@@ -125,32 +125,50 @@ export default function Sidebar({ notes, groups, username }: SidebarProps) {
   }
 
   const sidebarContent = (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-5 py-5 border-b border-cyber-fg/5">
-        <div>
-          <div className="flex items-center gap-2.5 mb-1">
-            <span className="text-lg">📓</span>
-            <h1 className="text-base font-bold tracking-tight cyber-gradient-text">Open Notebook</h1>
+    <div className="flex flex-col w-full h-full min-h-0">
+
+      {/* Header */}
+      <div className="flex-shrink-0 flex items-center justify-between px-4 py-4 border-b border-cyber-fg/5">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-base flex-shrink-0">📓</span>
+            <h1 className="text-sm font-bold tracking-tight cyber-gradient-text truncate">Open Notebook</h1>
           </div>
-          <p className="text-xs text-cyber-fg/20 font-mono">@{username}</p>
+          <p className="text-xs text-cyber-fg/20 font-mono truncate">@{username}</p>
         </div>
-        <button onClick={() => setOpen(false)} className="md:hidden text-cyber-fg/20 hover:text-cyber-fg/60 transition-colors px-1 py-1">
+        <button
+          onClick={() => setOpen(false)}
+          className="md:hidden flex-shrink-0 ml-2 text-cyber-fg/20 hover:text-cyber-fg/60 transition-colors p-1 rounded"
+        >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
       </div>
 
-      <div className="px-4 py-4 space-y-2 border-b border-cyber-fg/5">
-        <button onClick={createNote} className="w-full flex items-center justify-center gap-2 px-3 py-2 cyber-btn-primary rounded-lg">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+      {/* Action buttons */}
+      <div className="flex-shrink-0 px-3 py-3 space-y-2 border-b border-cyber-fg/5">
+        <button
+          onClick={createNote}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2.5 cyber-btn-primary rounded-lg"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="flex-shrink-0">
+            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
           <span>New Note</span>
         </button>
-        <div className="flex gap-1.5">
-          <button onClick={() => { setShowNewGroup(true); setShowJoinGroup(false); setError('') }} className="flex-1 px-2.5 py-2 cyber-btn-secondary text-xs rounded-lg">
+
+        <div className="grid grid-cols-2 gap-1.5">
+          <button
+            onClick={() => { setShowNewGroup(true); setShowJoinGroup(false); setError('') }}
+            className="px-2 py-2 cyber-btn-secondary text-xs rounded-lg truncate"
+          >
             + New Group
           </button>
-          <button onClick={() => { setShowJoinGroup(true); setShowNewGroup(false); setError('') }} className="flex-1 px-2.5 py-2 cyber-btn-secondary text-xs rounded-lg">
+          <button
+            onClick={() => { setShowJoinGroup(true); setShowNewGroup(false); setError('') }}
+            className="px-2 py-2 cyber-btn-secondary text-xs rounded-lg truncate"
+          >
             Join Group
           </button>
         </div>
@@ -167,11 +185,18 @@ export default function Sidebar({ notes, groups, username }: SidebarProps) {
               placeholder={showNewGroup ? 'Group name...' : 'Group code...'}
               className={`w-full px-3 py-2 cyber-input text-sm rounded-lg ${showJoinGroup ? 'uppercase' : ''}`}
             />
-            <div className="flex gap-1.5">
-              <button onClick={showNewGroup ? createGroup : joinGroup} disabled={loading} className="flex-1 py-2 cyber-btn-primary text-xs rounded-lg disabled:opacity-50">
-                {loading ? '...' : showNewGroup ? 'Create' : 'Join'}
+            <div className="grid grid-cols-2 gap-1.5">
+              <button
+                onClick={showNewGroup ? createGroup : joinGroup}
+                disabled={loading}
+                className="py-2 cyber-btn-primary text-xs rounded-lg disabled:opacity-50"
+              >
+                <span>{loading ? '...' : showNewGroup ? 'Create' : 'Join'}</span>
               </button>
-              <button onClick={() => { setShowNewGroup(false); setShowJoinGroup(false) }} className="flex-1 py-2 cyber-btn-secondary text-xs rounded-lg">
+              <button
+                onClick={() => { setShowNewGroup(false); setShowJoinGroup(false) }}
+                className="py-2 cyber-btn-secondary text-xs rounded-lg"
+              >
                 Cancel
               </button>
             </div>
@@ -179,10 +204,13 @@ export default function Sidebar({ notes, groups, username }: SidebarProps) {
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto cyber-scrollbar">
-        <section className="px-4 pt-4 pb-2">
+      {/* Scrollable notes + groups */}
+      <div className="flex-1 min-h-0 overflow-y-auto cyber-scrollbar">
+
+        {/* Notes */}
+        <section className="px-3 pt-3 pb-2">
           <div className="flex items-center justify-between mb-2 px-1">
-            <h2 className="text-[11px] font-semibold text-cyber-fg/20 uppercase tracking-widest">Notes</h2>
+            <h2 className="text-[10px] font-semibold text-cyber-fg/20 uppercase tracking-widest">Notes</h2>
             <span className="text-[10px] font-mono text-cyber-fg/15">{filteredNotes.length}</span>
           </div>
 
@@ -206,7 +234,9 @@ export default function Sidebar({ notes, groups, username }: SidebarProps) {
           </div>
 
           {filteredNotes.length === 0 && (
-            <p className="text-xs text-cyber-fg/15 px-2 py-4 text-center italic">{search ? 'No matching notes' : 'No notes yet'}</p>
+            <p className="text-xs text-cyber-fg/15 px-2 py-3 text-center italic">
+              {search ? 'No matching notes' : 'No notes yet'}
+            </p>
           )}
           <div className="space-y-0.5">
             {filteredNotes.map((note) => {
@@ -217,20 +247,22 @@ export default function Sidebar({ notes, groups, username }: SidebarProps) {
                   key={note.id}
                   href={`/note/${note.id}`}
                   onClick={() => setOpen(false)}
-                  className={`group block px-3 py-2.5 rounded-lg transition-all ${
+                  className={`group block px-3 py-2 rounded-lg transition-all ${
                     isActive
                       ? 'bg-cyber-pink/15 text-cyber-pink border border-cyber-pink/20'
                       : 'text-cyber-fg/40 hover:text-cyber-fg/70 hover:bg-cyber-fg/[0.02] border border-transparent'
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <span className={`text-sm leading-snug truncate ${isActive ? 'font-medium' : ''}`}>
+                  <div className="flex items-start justify-between gap-2 min-w-0">
+                    <span className={`text-sm leading-snug truncate min-w-0 ${isActive ? 'font-medium' : ''}`}>
                       {note.title || 'Untitled Note'}
                     </span>
-                    <span className="text-[10px] font-mono text-cyber-fg/15 shrink-0 mt-0.5">{relativeTime(note.updatedAt)}</span>
+                    <span className="text-[10px] font-mono text-cyber-fg/15 flex-shrink-0 mt-0.5">
+                      {relativeTime(note.updatedAt)}
+                    </span>
                   </div>
                   {preview && (
-                    <p className="text-[11px] text-cyber-fg/15 truncate mt-0.5 group-hover:text-cyber-fg/20 transition-colors">{preview}</p>
+                    <p className="text-[11px] text-cyber-fg/15 truncate mt-0.5">{preview}</p>
                   )}
                 </Link>
               )
@@ -238,33 +270,32 @@ export default function Sidebar({ notes, groups, username }: SidebarProps) {
           </div>
         </section>
 
-        <section className="px-4 pb-4 pt-2">
-          <h2 className="text-[11px] font-semibold text-cyber-fg/20 uppercase tracking-widest mb-2 px-1">Groups</h2>
+        {/* Groups */}
+        <section className="px-3 pb-3 pt-1">
+          <h2 className="text-[10px] font-semibold text-cyber-fg/20 uppercase tracking-widest mb-2 px-1">Groups</h2>
           {groups.length === 0 && (
-            <p className="text-xs text-cyber-fg/15 px-2 py-4 text-center italic">No groups yet</p>
+            <p className="text-xs text-cyber-fg/15 px-2 py-3 text-center italic">No groups yet</p>
           )}
           <div className="space-y-0.5">
             {groups.map((group) => {
               const isActive = pathname === `/group/${group.code}`
               return (
-                <div key={group.id} className="group/item flex items-center">
+                <div key={group.id} className="group/item flex items-center gap-1 min-w-0">
                   <Link
                     href={`/group/${group.code}`}
                     onClick={() => setOpen(false)}
-                    className={`flex-1 block px-3 py-2.5 rounded-lg transition-all ${
+                    className={`flex-1 min-w-0 block px-3 py-2 rounded-lg transition-all ${
                       isActive
-                      ? 'bg-cyber-pink/15 text-cyber-pink border border-cyber-pink/20'
-                      : 'text-cyber-fg/40 hover:text-cyber-fg/70 hover:bg-cyber-fg/[0.02] border border-transparent'
+                        ? 'bg-cyber-pink/15 text-cyber-pink border border-cyber-pink/20'
+                        : 'text-cyber-fg/40 hover:text-cyber-fg/70 hover:bg-cyber-fg/[0.02] border border-transparent'
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm truncate">{group.name}</span>
-                    </div>
-                    <span className="text-[11px] text-cyber-fg/15 font-mono">{group.code}</span>
+                    <span className="block text-sm truncate">{group.name}</span>
+                    <span className="block text-[11px] text-cyber-fg/15 font-mono">{group.code}</span>
                   </Link>
                   <button
                     onClick={() => leaveGroup(group.code)}
-                    className="ml-1 px-1.5 py-1 text-[10px] font-mono text-cyber-fg/10 hover:text-red-400 opacity-0 group-hover/item:opacity-100 transition-all"
+                    className="flex-shrink-0 p-1.5 text-cyber-fg/10 hover:text-red-400 opacity-0 group-hover/item:opacity-100 transition-all rounded"
                     title="Leave group"
                   >
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -278,12 +309,16 @@ export default function Sidebar({ notes, groups, username }: SidebarProps) {
         </section>
       </div>
 
-      <div className="px-4 py-3 border-t border-cyber-fg/5 space-y-1.5">
-        <button onClick={logout} className="w-full flex items-center gap-2 px-3 py-2 cyber-btn-secondary rounded-lg text-sm">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      {/* Footer */}
+      <div className="flex-shrink-0 px-3 py-3 border-t border-cyber-fg/5">
+        <button
+          onClick={logout}
+          className="w-full flex items-center gap-2 px-3 py-2 cyber-btn-secondary rounded-lg text-sm"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="flex-shrink-0">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
           </svg>
-          Sign out
+          <span>Sign out</span>
         </button>
       </div>
     </div>
@@ -291,6 +326,7 @@ export default function Sidebar({ notes, groups, username }: SidebarProps) {
 
   return (
     <>
+      {/* Mobile hamburger button */}
       <button
         onClick={() => setOpen(true)}
         className="md:hidden fixed top-3 left-3 z-40 w-9 h-9 flex items-center justify-center bg-cyber-dark border border-cyber-cyan/15 rounded-lg text-cyber-cyan shadow-lg shadow-black/30 hover:bg-cyber-fg/[0.05] transition-colors"
@@ -301,15 +337,23 @@ export default function Sidebar({ notes, groups, username }: SidebarProps) {
         </svg>
       </button>
 
+      {/* Mobile backdrop */}
       {open && (
-        <div className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm animate-[fade-in_0.15s_ease]" onClick={() => setOpen(false)} />
+        <div
+          className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm animate-[fade-in_0.15s_ease]"
+          onClick={() => setOpen(false)}
+        />
       )}
 
+      {/* Sidebar panel */}
       <aside
-        className={`flex-shrink-0 bg-cyber-darker border-r border-cyber-fg/5 text-cyber-fg/80 h-screen overflow-y-hidden overflow-x-hidden relative
-          md:flex md:w-72 md:relative
-          ${open ? 'fixed inset-y-0 left-0 z-50 w-80 flex' : 'hidden'}
-          transition-transform duration-300 ease-out-expo`}
+        className={`
+          flex-shrink-0 flex flex-col
+          bg-cyber-darker border-r border-cyber-fg/5 text-cyber-fg/80
+          h-screen w-72
+          md:relative md:flex
+          ${open ? 'fixed inset-y-0 left-0 z-50 flex w-72' : 'hidden'}
+        `}
       >
         {sidebarContent}
       </aside>
