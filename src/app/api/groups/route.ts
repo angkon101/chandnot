@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { createAdminClient } from '@/lib/supabase'
 import { getAuthUser } from '@/lib/auth'
 import { customAlphabet } from 'nanoid'
 
@@ -9,20 +9,14 @@ export async function GET() {
   const auth = getAuthUser()
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const memberships = await prisma.groupMember.findMany({
-    where: { userId: auth.userId },
-    include: {
-      group: {
-        include: {
-          members: { include: { user: { select: { username: true } } } },
-          _count: { select: { notes: true } },
-        },
-      },
-    },
-    orderBy: { createdAt: 'desc' },
-  })
+  const admin = createAdminClient()
+  const { data: memberships } = await admin
+    .from('GroupMember')
+    .select('role, group:Group!GroupMember_groupId_fkey(*, members:GroupMember(*))')
+    .eq('userId', auth.userId)
+    .order('createdAt', { ascending: false })
 
-  const groups = memberships.map((m) => ({ ...m.group, role: m.role }))
+  const groups = (memberships ?? []).map((m: any) => ({ ...m.group, role: m.role }))
   return NextResponse.json({ groups })
 }
 
@@ -33,20 +27,21 @@ export async function POST(req: NextRequest) {
   const { name } = await req.json()
   if (!name?.trim()) return NextResponse.json({ error: 'Group name is required' }, { status: 400 })
 
+  const admin = createAdminClient()
+
+  // Generate unique code
   let code = generateCode()
-  // Ensure code is unique
-  while (await prisma.group.findUnique({ where: { code } })) {
+  while (true) {
+    const { data } = await admin.from('Group').select('id').eq('code', code).maybeSingle()
+    if (!data) break
     code = generateCode()
   }
 
-  const group = await prisma.group.create({
-    data: {
-      code,
-      name: name.trim(),
-      members: { create: { userId: auth.userId, role: 'admin' } },
-    },
-    include: { members: { include: { user: { select: { username: true } } } } },
-  })
+  const { data: group, error } = await admin
+    .from('Group').insert({ code, name: name.trim() }).select().single()
+  if (error || !group) return NextResponse.json({ error: 'Failed to create group' }, { status: 500 })
+
+  await admin.from('GroupMember').insert({ userId: auth.userId, groupId: group.id, role: 'admin' })
 
   return NextResponse.json({ group }, { status: 201 })
 }

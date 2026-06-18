@@ -1,6 +1,6 @@
 import { redirect, notFound } from 'next/navigation'
 import { getAuthUser } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { createAdminClient } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
 import NoteEditor from '@/components/Editor'
 import GroupNoteCreate from '@/components/GroupNoteCreate'
@@ -16,50 +16,42 @@ export default async function GroupPage({
   const auth = getAuthUser()
   if (!auth) redirect('/login')
 
-  const [group, notes, memberships, myNotes] = await Promise.all([
-    prisma.group.findUnique({
-      where: { code: params.code },
-      include: { members: { include: { user: { select: { username: true } } } } },
-    }),
-    prisma.note.findMany({
-      where: { group: { code: params.code } },
-      include: { user: { select: { username: true } } },
-      orderBy: { updatedAt: 'desc' },
-    }),
-    prisma.groupMember.findMany({
-      where: { userId: auth.userId },
-      include: { group: true },
-    }),
-    prisma.note.findMany({
-      where: { userId: auth.userId, groupId: null },
-      orderBy: { updatedAt: 'desc' },
-      select: { id: true, title: true, updatedAt: true, createdAt: true, userId: true, groupId: true, content: true },
-    }),
+  const admin = createAdminClient()
+  const [{ data: group }, { data: myNotes }, { data: memberships }] = await Promise.all([
+    admin
+      .from('Group')
+      .select('*, members:GroupMember!GroupMember_groupId_fkey(*, user:User!GroupMember_userId_fkey(id, username))')
+      .eq('code', params.code)
+      .maybeSingle(),
+    admin
+      .from('Note')
+      .select('id, title, updatedAt, createdAt, userId, groupId, content')
+      .eq('userId', auth.userId)
+      .is('groupId', null)
+      .order('updatedAt', { ascending: false }),
+    admin
+      .from('GroupMember')
+      .select('group:Group!GroupMember_groupId_fkey(id, code, name, createdAt)')
+      .eq('userId', auth.userId),
   ])
 
   if (!group) notFound()
 
-  const isMember = group.members.some((m) => m.userId === auth.userId)
+  const isMember = group.members?.some((m: any) => m.userId === auth.userId)
   if (!isMember) redirect('/dashboard')
 
-  const groups = memberships.map((m) => ({
-    id: m.group.id,
-    code: m.group.code,
-    name: m.group.name,
-    createdAt: m.group.createdAt.toISOString(),
-  }))
+  const { data: groupNotes } = await admin
+    .from('Note')
+    .select('*, user:User!Note_userId_fkey(username)')
+    .eq('groupId', group.id)
+    .order('updatedAt', { ascending: false })
 
-  const serializedMyNotes = myNotes.map((n) => ({
-    ...n,
-    createdAt: n.createdAt.toISOString(),
-    updatedAt: n.updatedAt.toISOString(),
-  }))
-
-  const activeNote = searchParams.note ? notes.find((n) => n.id === searchParams.note) : null
+  const groups = (memberships ?? []).map((m: any) => m.group).filter(Boolean)
+  const activeNote = searchParams.note ? (groupNotes ?? []).find((n: any) => n.id === searchParams.note) : null
 
   return (
     <div className="flex h-screen">
-      <Sidebar notes={serializedMyNotes} groups={groups} username={auth.username} />
+      <Sidebar notes={myNotes ?? []} groups={groups} username={auth.username} />
 
       {/* Group panel */}
       <aside className="w-60 flex-shrink-0 border-r border-gray-200 bg-gray-50 flex flex-col">
@@ -70,7 +62,7 @@ export default async function GroupPage({
               {group.code}
             </span>
             <span className="text-xs text-gray-400">
-              {group.members.length} member{group.members.length !== 1 ? 's' : ''}
+              {group.members?.length ?? 0} member{(group.members?.length ?? 0) !== 1 ? 's' : ''}
             </span>
           </div>
         </div>
@@ -78,29 +70,27 @@ export default async function GroupPage({
         {/* Members */}
         <div className="px-4 py-3 border-b border-gray-200">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Members</p>
-          {group.members.map((m) => (
+          {(group.members ?? []).map((m: any) => (
             <div key={m.userId} className="flex items-center gap-1.5 py-0.5">
               <div className="w-5 h-5 rounded-full bg-violet-200 flex items-center justify-center text-xs text-violet-700 font-medium">
-                {m.user.username[0].toUpperCase()}
+                {m.user?.username?.[0]?.toUpperCase()}
               </div>
-              <span className="text-sm text-gray-600 truncate">{m.user.username}</span>
-              {m.role === 'admin' && (
-                <span className="text-xs text-violet-500 ml-auto">admin</span>
-              )}
+              <span className="text-sm text-gray-600 truncate">{m.user?.username}</span>
+              {m.role === 'admin' && <span className="text-xs text-violet-500 ml-auto">admin</span>}
             </div>
           ))}
         </div>
 
-        {/* Group Notes */}
+        {/* Notes */}
         <div className="flex-1 overflow-y-auto px-4 py-3">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Notes</p>
             <GroupNoteCreate groupCode={params.code} />
           </div>
-          {notes.length === 0 && (
+          {(groupNotes ?? []).length === 0 && (
             <p className="text-xs text-gray-400 italic">No notes yet. Create one!</p>
           )}
-          {notes.map((note) => (
+          {(groupNotes ?? []).map((note: any) => (
             <Link
               key={note.id}
               href={`/group/${params.code}?note=${note.id}`}
@@ -111,7 +101,7 @@ export default async function GroupPage({
               }`}
             >
               <div className="truncate">{note.title || 'Untitled'}</div>
-              <div className="text-xs text-gray-400 truncate">by {note.user.username}</div>
+              <div className="text-xs text-gray-400 truncate">by {note.user?.username}</div>
             </Link>
           ))}
         </div>

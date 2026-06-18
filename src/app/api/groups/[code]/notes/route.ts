@@ -1,50 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { createAdminClient } from '@/lib/supabase'
 import { getAuthUser } from '@/lib/auth'
 
 export async function GET(_req: Request, { params }: { params: { code: string } }) {
   const auth = getAuthUser()
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const group = await prisma.group.findUnique({ where: { code: params.code } })
+  const admin = createAdminClient()
+  const { data: group } = await admin.from('Group').select('id').eq('code', params.code).maybeSingle()
   if (!group) return NextResponse.json({ error: 'Group not found' }, { status: 404 })
 
-  const member = await prisma.groupMember.findFirst({
-    where: { groupId: group.id, userId: auth.userId },
-  })
+  const { data: member } = await admin
+    .from('GroupMember').select('id').eq('groupId', group.id).eq('userId', auth.userId).maybeSingle()
   if (!member) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const notes = await prisma.note.findMany({
-    where: { groupId: group.id },
-    include: { user: { select: { username: true } } },
-    orderBy: { updatedAt: 'desc' },
-  })
+  const { data: notes } = await admin
+    .from('Note')
+    .select('*, user:User!Note_userId_fkey(username)')
+    .eq('groupId', group.id)
+    .order('updatedAt', { ascending: false })
 
-  return NextResponse.json({ notes })
+  return NextResponse.json({ notes: notes ?? [] })
 }
 
 export async function POST(req: NextRequest, { params }: { params: { code: string } }) {
   const auth = getAuthUser()
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const group = await prisma.group.findUnique({ where: { code: params.code } })
+  const admin = createAdminClient()
+  const { data: group } = await admin.from('Group').select('id').eq('code', params.code).maybeSingle()
   if (!group) return NextResponse.json({ error: 'Group not found' }, { status: 404 })
 
-  const member = await prisma.groupMember.findFirst({
-    where: { groupId: group.id, userId: auth.userId },
-  })
+  const { data: member } = await admin
+    .from('GroupMember').select('id').eq('groupId', group.id).eq('userId', auth.userId).maybeSingle()
   if (!member) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body = await req.json().catch(() => ({}))
-  const note = await prisma.note.create({
-    data: {
-      title: body.title || 'Untitled Note',
-      content: body.content || '{}',
-      userId: auth.userId,
-      groupId: group.id,
-    },
-    include: { user: { select: { username: true } } },
-  })
+  const { data: note, error } = await admin
+    .from('Note')
+    .insert({ title: body.title || 'Untitled Note', content: body.content || '{}', userId: auth.userId, groupId: group.id })
+    .select('*, user:User!Note_userId_fkey(username)')
+    .single()
 
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ note }, { status: 201 })
 }

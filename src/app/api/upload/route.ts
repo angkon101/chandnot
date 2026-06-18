@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/auth'
-import { writeFile } from 'fs/promises'
-import { join } from 'path'
+import { createAdminClient } from '@/lib/supabase'
 
 export async function POST(req: NextRequest) {
   const auth = getAuthUser()
@@ -11,14 +10,17 @@ export async function POST(req: NextRequest) {
   const file = formData.get('file') as File
   if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
 
-  const bytes = await file.arrayBuffer()
-  const buffer = Buffer.from(bytes)
-
   const ext = file.name.split('.').pop() || 'png'
   const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-  const filepath = join(process.cwd(), 'public', 'uploads', filename)
+  const bytes = await file.arrayBuffer()
 
-  await writeFile(filepath, buffer)
+  const admin = createAdminClient()
+  const { data, error } = await admin.storage
+    .from('uploads')
+    .upload(filename, bytes, { contentType: file.type, upsert: false })
 
-  return NextResponse.json({ url: `/uploads/${filename}` })
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  const { data: { publicUrl } } = admin.storage.from('uploads').getPublicUrl(data.path)
+  return NextResponse.json({ url: publicUrl })
 }
