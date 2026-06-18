@@ -30,7 +30,7 @@ export default async function NotePage({ params }: { params: { id: string } }) {
   return (
     <div className="flex h-screen">
       <Sidebar notes={notes ?? []} groups={groups} username={auth.username} />
-      <main className="flex-1 overflow-hidden bg-cyber-black">
+      <main className="flex-1 overflow-hidden bg-cyber-black min-w-0">
         <NoteEditor
           noteId={note.id}
           initialTitle={note.title}

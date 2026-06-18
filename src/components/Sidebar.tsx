@@ -12,16 +12,14 @@ interface SidebarProps {
 }
 
 function relativeTime(dateStr: string): string {
-  const now = Date.now()
-  const date = new Date(dateStr).getTime()
-  const diff = now - date
+  const diff = Date.now() - new Date(dateStr).getTime()
   const mins = Math.floor(diff / 60000)
   if (mins < 1) return 'just now'
-  if (mins < 60) return `${mins}m ago`
+  if (mins < 60) return `${mins}m`
   const hours = Math.floor(mins / 60)
-  if (hours < 24) return `${hours}h ago`
+  if (hours < 24) return `${hours}h`
   const days = Math.floor(hours / 24)
-  if (days < 30) return `${days}d ago`
+  if (days < 30) return `${days}d`
   return new Date(dateStr).toLocaleDateString()
 }
 
@@ -46,6 +44,7 @@ function getPreview(content: string): string {
 }
 
 export default function Sidebar({ notes, groups, username }: SidebarProps) {
+  const [open, setOpen] = useState(false)
   const [showNewGroup, setShowNewGroup] = useState(false)
   const [showJoinGroup, setShowJoinGroup] = useState(false)
   const [groupName, setGroupName] = useState('')
@@ -70,6 +69,7 @@ export default function Sidebar({ notes, groups, username }: SidebarProps) {
     const res = await fetch('/api/notes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
     if (res.ok) {
       const { note } = await res.json()
+      setOpen(false)
       router.push(`/note/${note.id}`)
       router.refresh()
     }
@@ -77,45 +77,35 @@ export default function Sidebar({ notes, groups, username }: SidebarProps) {
 
   const createGroup = async () => {
     if (!groupName.trim()) return
-    setLoading(true)
-    setError('')
+    setLoading(true); setError('')
     const res = await fetch('/api/groups', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: groupName }),
     })
     setLoading(false)
     if (res.ok) {
       const { group } = await res.json()
-      setShowNewGroup(false)
-      setGroupName('')
-      router.push(`/group/${group.code}`)
-      router.refresh()
+      setShowNewGroup(false); setGroupName(''); setOpen(false)
+      router.push(`/group/${group.code}`); router.refresh()
     } else {
-      const d = await res.json()
-      setError(d.error)
+      const d = await res.json(); setError(d.error)
     }
   }
 
   const joinGroup = async () => {
     if (!joinCode.trim()) return
-    setLoading(true)
-    setError('')
+    setLoading(true); setError('')
     const res = await fetch('/api/groups/join', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code: joinCode }),
     })
     setLoading(false)
     if (res.ok) {
       const { group } = await res.json()
-      setShowJoinGroup(false)
-      setJoinCode('')
-      router.push(`/group/${group.code}`)
-      router.refresh()
+      setShowJoinGroup(false); setJoinCode(''); setOpen(false)
+      router.push(`/group/${group.code}`); router.refresh()
     } else {
-      const d = await res.json()
-      setError(d.error)
+      const d = await res.json(); setError(d.error)
     }
   }
 
@@ -126,9 +116,7 @@ export default function Sidebar({ notes, groups, username }: SidebarProps) {
     setLoading(false)
     if (res.ok) {
       router.refresh()
-      if (pathname === `/group/${groupCode}`) {
-        router.push('/dashboard')
-      }
+      if (pathname === `/group/${groupCode}`) router.push('/dashboard')
     }
   }
 
@@ -137,80 +125,56 @@ export default function Sidebar({ notes, groups, username }: SidebarProps) {
     router.push('/login')
   }
 
-  return (
-    <aside className="w-64 flex-shrink-0 bg-cyber-darker border-r border-cyber-cyan/10 text-white flex flex-col h-screen overflow-hidden relative">
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyber-cyan/30 to-transparent" />
-
+  const sidebarContent = (
+    <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="px-4 py-5 border-b border-cyber-cyan/10">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-lg">📓</span>
-          <h1 className="text-lg font-bold cyber-gradient-text font-display">Open Notebook</h1>
+      <div className="flex items-center justify-between px-5 py-5 border-b border-white/5">
+        <div>
+          <div className="flex items-center gap-2.5 mb-1">
+            <span className="text-lg">📓</span>
+            <h1 className="text-base font-bold tracking-tight cyber-gradient-text">Open Notebook</h1>
+          </div>
+          <p className="text-xs text-white/20 font-mono">@{username}</p>
         </div>
-        <p className="text-xs text-white/20 font-mono">@{username}</p>
+        <button onClick={() => setOpen(false)} className="md:hidden text-white/20 hover:text-white/60 transition-colors px-1 py-1">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
       </div>
 
       {/* Actions */}
-      <div className="px-3 py-3 space-y-1 border-b border-cyber-cyan/10">
-        <button
-          onClick={createNote}
-          className="w-full flex items-center gap-2 px-3 py-2 cyber-btn-primary text-sm rounded"
-        >
-          <span className="text-lg leading-none">+</span> New Note
+      <div className="px-4 py-4 space-y-2 border-b border-white/5">
+        <button onClick={createNote} className="w-full flex items-center justify-center gap-2 px-3 py-2 cyber-btn-primary text-sm rounded-lg">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+          New Note
         </button>
-        <div className="flex gap-1">
-          <button
-            onClick={() => { setShowNewGroup(true); setShowJoinGroup(false); setError('') }}
-            className="flex-1 px-2 py-1.5 cyber-btn-secondary text-xs rounded"
-          >
+        <div className="flex gap-1.5">
+          <button onClick={() => { setShowNewGroup(true); setShowJoinGroup(false); setError('') }} className="flex-1 px-2.5 py-2 cyber-btn-secondary text-xs rounded-lg">
             + New Group
           </button>
-          <button
-            onClick={() => { setShowJoinGroup(true); setShowNewGroup(false); setError('') }}
-            className="flex-1 px-2 py-1.5 cyber-btn-secondary text-xs rounded"
-          >
+          <button onClick={() => { setShowJoinGroup(true); setShowNewGroup(false); setError('') }} className="flex-1 px-2.5 py-2 cyber-btn-secondary text-xs rounded-lg">
             Join Group
           </button>
         </div>
 
-        {error && <p className="text-cyber-pink text-xs px-1">{error}</p>}
+        {error && <p className="text-red-400/80 text-xs px-1">{error}</p>}
 
-        {showNewGroup && (
-          <div className="space-y-1">
+        {(showNewGroup || showJoinGroup) && (
+          <div className="space-y-1.5 animate-[slide-up_0.2s_ease-out]">
             <input
               autoFocus
-              value={groupName}
-              onChange={(e) => setGroupName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && createGroup()}
-              placeholder="Group name..."
-              className="w-full px-2 py-1.5 cyber-input text-sm rounded"
+              value={showNewGroup ? groupName : joinCode}
+              onChange={(e) => showNewGroup ? setGroupName(e.target.value) : setJoinCode(e.target.value.toUpperCase())}
+              onKeyDown={(e) => e.key === 'Enter' && (showNewGroup ? createGroup() : joinGroup())}
+              placeholder={showNewGroup ? 'Group name...' : 'Group code...'}
+              className={`w-full px-3 py-2 cyber-input text-sm rounded-lg ${showJoinGroup ? 'uppercase' : ''}`}
             />
-            <div className="flex gap-1">
-              <button onClick={createGroup} disabled={loading} className="flex-1 py-1 cyber-btn-primary text-xs rounded disabled:opacity-50">
-                {loading ? '...' : 'Create'}
+            <div className="flex gap-1.5">
+              <button onClick={showNewGroup ? createGroup : joinGroup} disabled={loading} className="flex-1 py-2 cyber-btn-primary text-xs rounded-lg disabled:opacity-50">
+                {loading ? '...' : showNewGroup ? 'Create' : 'Join'}
               </button>
-              <button onClick={() => setShowNewGroup(false)} className="flex-1 py-1 cyber-btn-secondary text-xs rounded">
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
-
-        {showJoinGroup && (
-          <div className="space-y-1">
-            <input
-              autoFocus
-              value={joinCode}
-              onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-              onKeyDown={(e) => e.key === 'Enter' && joinGroup()}
-              placeholder="Group code..."
-              className="w-full px-2 py-1.5 cyber-input text-sm rounded uppercase"
-            />
-            <div className="flex gap-1">
-              <button onClick={joinGroup} disabled={loading} className="flex-1 py-1 cyber-btn-primary text-xs rounded disabled:opacity-50">
-                {loading ? '...' : 'Join'}
-              </button>
-              <button onClick={() => setShowJoinGroup(false)} className="flex-1 py-1 cyber-btn-secondary text-xs rounded">
+              <button onClick={() => { setShowNewGroup(false); setShowJoinGroup(false) }} className="flex-1 py-2 cyber-btn-secondary text-xs rounded-lg">
                 Cancel
               </button>
             </div>
@@ -219,101 +183,141 @@ export default function Sidebar({ notes, groups, username }: SidebarProps) {
       </div>
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-4 cyber-scrollbar">
+      <div className="flex-1 overflow-y-auto cyber-scrollbar">
         {/* My Notes */}
-        <section>
-          <div className="flex items-center justify-between mb-1 px-1">
-            <p className="text-xs font-semibold text-white/20 uppercase tracking-wider font-display">My Notes</p>
+        <section className="px-4 pt-4 pb-2">
+          <div className="flex items-center justify-between mb-2 px-1">
+            <h2 className="text-[11px] font-semibold text-white/20 uppercase tracking-widest">Notes</h2>
             <span className="text-[10px] font-mono text-white/15">{filteredNotes.length}</span>
           </div>
 
-          {/* Search */}
-          <div className="relative mb-1">
+          <div className="relative mb-2">
+            <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-white/15 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search notes..."
-              className="w-full px-2 py-1 cyber-input text-xs rounded"
+              className="w-full pl-7 pr-6 py-1.5 cyber-input text-xs rounded-lg"
             />
             {search && (
-              <button
-                onClick={() => setSearch('')}
-                className="absolute right-1 top-1/2 -translate-y-1/2 text-white/20 hover:text-white/50 text-[10px] px-1"
-              >
-                x
+              <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-white/15 hover:text-white/50 transition-colors">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
               </button>
             )}
           </div>
 
           {filteredNotes.length === 0 && (
-            <p className="text-xs text-white/15 px-2 italic">{search ? 'No matching notes' : 'No notes yet'}</p>
+            <p className="text-xs text-white/15 px-2 py-4 text-center italic">{search ? 'No matching notes' : 'No notes yet'}</p>
           )}
-          {filteredNotes.map((note) => {
-            const preview = getPreview(note.content || '')
-            return (
-              <Link
-                key={note.id}
-                href={`/note/${note.id}`}
-                className={`block px-2 py-1.5 transition-all ${
-                  pathname === `/note/${note.id}`
-                    ? 'bg-cyber-cyan/10 text-cyber-cyan border-l-2 border-cyber-cyan'
-                    : 'text-white/40 hover:text-white/70 hover:bg-white/[0.02] border-l-2 border-transparent'
-                }`}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm truncate">{note.title || 'Untitled Note'}</span>
-                  <span className="text-[10px] font-mono text-white/20 shrink-0">{relativeTime(note.updatedAt)}</span>
-                </div>
-                {preview && (
-                  <p className="text-[11px] text-white/20 truncate mt-0.5">{preview}</p>
-                )}
-              </Link>
-            )
-          })}
+          <div className="space-y-0.5">
+            {filteredNotes.map((note) => {
+              const preview = getPreview(note.content || '')
+              const isActive = pathname === `/note/${note.id}`
+              return (
+                <Link
+                  key={note.id}
+                  href={`/note/${note.id}`}
+                  onClick={() => setOpen(false)}
+                  className={`group block px-3 py-2.5 rounded-lg transition-all ${
+                    isActive
+                      ? 'bg-cyan-900/20 text-cyber-cyan border border-cyan-900/30'
+                      : 'text-white/40 hover:text-white/70 hover:bg-white/[0.02] border border-transparent'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <span className={`text-sm leading-snug truncate ${isActive ? 'font-medium' : ''}`}>
+                      {note.title || 'Untitled Note'}
+                    </span>
+                    <span className="text-[10px] font-mono text-white/15 shrink-0 mt-0.5">{relativeTime(note.updatedAt)}</span>
+                  </div>
+                  {preview && (
+                    <p className="text-[11px] text-white/15 truncate mt-0.5 group-hover:text-white/20 transition-colors">{preview}</p>
+                  )}
+                </Link>
+              )
+            })}
+          </div>
         </section>
 
         {/* Groups */}
-        <section>
-          <p className="text-xs font-semibold text-white/20 uppercase tracking-wider mb-1 px-1 font-display">Groups</p>
+        <section className="px-4 pb-4 pt-2">
+          <h2 className="text-[11px] font-semibold text-white/20 uppercase tracking-widest mb-2 px-1">Groups</h2>
           {groups.length === 0 && (
-            <p className="text-xs text-white/15 px-2 italic">No groups yet</p>
+            <p className="text-xs text-white/15 px-2 py-4 text-center italic">No groups yet</p>
           )}
-          {groups.map((group) => (
-            <div key={group.id} className="group flex items-center">
-              <Link
-                href={`/group/${group.code}`}
-                className={`flex-1 block px-2 py-1.5 transition-all ${
-                  pathname === `/group/${group.code}`
-                    ? 'bg-cyber-cyan/10 text-cyber-cyan border-l-2 border-cyber-cyan'
-                    : 'text-white/40 hover:text-white/70 hover:bg-white/[0.02] border-l-2 border-transparent'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm truncate">{group.name}</span>
+          <div className="space-y-0.5">
+            {groups.map((group) => {
+              const isActive = pathname === `/group/${group.code}`
+              return (
+                <div key={group.id} className="group/item flex items-center">
+                  <Link
+                    href={`/group/${group.code}`}
+                    onClick={() => setOpen(false)}
+                    className={`flex-1 block px-3 py-2.5 rounded-lg transition-all ${
+                      isActive
+                        ? 'bg-cyan-900/20 text-cyber-cyan border border-cyan-900/30'
+                        : 'text-white/40 hover:text-white/70 hover:bg-white/[0.02] border border-transparent'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm truncate">{group.name}</span>
+                    </div>
+                    <span className="text-[11px] text-white/15 font-mono">{group.code}</span>
+                  </Link>
+                  <button
+                    onClick={() => leaveGroup(group.code)}
+                    className="ml-1 px-1.5 py-1 text-[10px] font-mono text-white/10 hover:text-red-400 opacity-0 group-hover/item:opacity-100 transition-all"
+                    title="Leave group"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                  </button>
                 </div>
-                <span className="text-xs text-white/15 font-mono">{group.code}</span>
-              </Link>
-              <button
-                onClick={() => leaveGroup(group.code)}
-                className="shrink-0 px-1.5 py-1 text-[10px] font-mono text-white/10 hover:text-cyber-pink opacity-0 group-hover:opacity-100 transition-all"
-                title="Leave group"
-              >
-                x
-              </button>
-            </div>
-          ))}
+              )
+            })}
+          </div>
         </section>
       </div>
 
       {/* Footer */}
-      <div className="px-3 py-3 border-t border-cyber-cyan/10">
-        <button
-          onClick={logout}
-          className="w-full px-3 py-2 cyber-btn-secondary text-sm text-left rounded"
-        >
+      <div className="px-4 py-3 border-t border-white/5">
+        <button onClick={logout} className="w-full px-3 py-2 cyber-btn-secondary text-sm rounded-lg text-left">
           Sign out
         </button>
       </div>
-    </aside>
+    </div>
+  )
+
+  return (
+    <>
+      {/* Mobile hamburger */}
+      <button
+        onClick={() => setOpen(true)}
+        className="md:hidden fixed top-3 left-3 z-40 w-9 h-9 flex items-center justify-center bg-cyber-dark border border-cyber-cyan/15 rounded-lg text-cyber-cyan shadow-lg shadow-black/30 hover:bg-cyber-gray transition-colors"
+        aria-label="Open menu"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="18" x2="20" y2="18" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm animate-[fade-in_0.15s_ease]" onClick={() => setOpen(false)} />
+      )}
+
+      <aside
+        className={`flex-shrink-0 bg-cyber-darker border-r border-white/5 text-white h-screen overflow-hidden relative
+          md:flex md:w-64 md:relative
+          ${open ? 'fixed inset-y-0 left-0 z-50 w-72 flex' : 'hidden'}
+          transition-transform duration-300 ease-out-expo`}
+      >
+        {sidebarContent}
+      </aside>
+    </>
   )
 }

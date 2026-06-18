@@ -10,8 +10,7 @@ export default function GroupNoteCreate({ groupCode }: { groupCode: string }) {
   const createNote = async () => {
     setLoading(true)
     const res = await fetch(`/api/groups/${groupCode}/notes`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({}),
     })
     setLoading(false)
@@ -26,9 +25,9 @@ export default function GroupNoteCreate({ groupCode }: { groupCode: string }) {
     <button
       onClick={createNote}
       disabled={loading}
-      className="text-xs font-mono cyber-gradient-text hover:opacity-80 transition-opacity disabled:opacity-50"
+      className="text-xs font-mono text-cyan-400/60 hover:text-cyan-400 transition-colors disabled:opacity-40"
     >
-      {loading ? '...' : '+ NEW'}
+      {loading ? '...' : '+ New'}
     </button>
   )
 }
