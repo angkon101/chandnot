@@ -27,21 +27,27 @@ export default async function DashboardPage() {
   return (
     <div className="flex h-screen">
       <Sidebar notes={notes ?? []} groups={groups} username={auth.username} />
-      <main className="flex-1 flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="text-7xl mb-4">📓</div>
-          <h2 className="text-2xl font-bold text-gray-700 mb-2">Your Open Notebook</h2>
-          <p className="text-gray-400 mb-6">Select a note to edit or create a new one</p>
-          <div className="grid grid-cols-2 gap-3 max-w-xs mx-auto text-sm text-gray-500">
-            <div className="bg-white rounded-xl p-4 border border-gray-200">
-              <div className="text-2xl mb-1">📝</div>
-              <div className="font-medium text-gray-700">{(notes ?? []).length}</div>
-              <div>Personal notes</div>
+      <main className="flex-1 flex items-center justify-center bg-cyber-black cyber-grid relative overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-px h-40 bg-gradient-to-b from-transparent via-cyber-cyan/10 to-transparent" />
+          <div className="absolute bottom-1/4 right-1/4 w-px h-40 bg-gradient-to-t from-transparent via-cyber-pink/10 to-transparent" />
+        </div>
+
+        <div className="text-center relative">
+          <div className="text-5xl mb-4 inline-block">📓</div>
+          <h2 className="text-2xl font-bold font-display cyber-gradient-text mb-2">Your Open Notebook</h2>
+          <p className="text-white/30 mb-6 font-mono text-sm">Select a note to edit or create a new one</p>
+          <div className="grid grid-cols-2 gap-3 max-w-xs mx-auto">
+            <div className="cyber-card p-4">
+              <div className="text-xl mb-1">📝</div>
+              <div className="font-bold cyber-gradient-text text-lg font-mono">{(notes ?? []).length}</div>
+              <div className="text-white/30 text-xs font-mono mt-1">PERSONAL NOTES</div>
             </div>
-            <div className="bg-white rounded-xl p-4 border border-gray-200">
-              <div className="text-2xl mb-1">👥</div>
-              <div className="font-medium text-gray-700">{groups.length}</div>
-              <div>Groups joined</div>
+            <div className="cyber-card p-4">
+              <div className="text-xl mb-1">👥</div>
+              <div className="font-bold cyber-gradient-text text-lg font-mono">{groups.length}</div>
+              <div className="text-white/30 text-xs font-mono mt-1">GROUPS JOINED</div>
             </div>
           </div>
         </div>

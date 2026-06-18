@@ -8,7 +8,7 @@ import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import TextStyle from '@tiptap/extension-text-style'
 import Underline from '@tiptap/extension-underline'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient, RealtimeChannel } from '@supabase/supabase-js'
 import Toolbar from './Toolbar'
@@ -31,20 +31,34 @@ export default function NoteEditor({ noteId, initialTitle, initialContent, group
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved' | 'error'>('saved')
   const [headings, setHeadings] = useState<Heading[]>([])
   const [lastEditor, setLastEditor] = useState('')
+  const [stats, setStats] = useState({ words: 0, chars: 0 })
   const saveTimer = useRef<NodeJS.Timeout | null>(null)
   const channelRef = useRef<RealtimeChannel | null>(null)
   const isRemoteUpdate = useRef(false)
+  const titleRef = useRef(title)
+  const usernameRef = useRef(username)
   const router = useRouter()
+
+  useEffect(() => { titleRef.current = title }, [title])
+  useEffect(() => { usernameRef.current = username }, [username])
 
   const extractHeadings = useCallback((ed: ReturnType<typeof useEditor>) => {
     if (!ed) return
     const items: Heading[] = []
+    let words = 0
+    let chars = 0
     ed.state.doc.descendants((node) => {
       if (node.type.name === 'heading') {
         items.push({ level: node.attrs.level, text: node.textContent })
       }
+      if (node.isText) {
+        const text = node.text || ''
+        chars += text.length
+        words += text.trim() ? text.trim().split(/\s+/).length : 0
+      }
     })
     setHeadings(items)
+    setStats({ words, chars })
   }, [])
 
   const editor = useEditor({
@@ -63,11 +77,11 @@ export default function NoteEditor({ noteId, initialTitle, initialContent, group
       setSaveStatus('unsaved')
       extractHeadings(ed)
       const content = JSON.stringify(ed.getJSON())
-      scheduleAutoSave(title, content)
+      scheduleAutoSave(titleRef.current, content)
       channelRef.current?.send({
         type: 'broadcast',
         event: 'note-change',
-        payload: { noteId, content, title, username },
+        payload: { noteId, content, title: titleRef.current, username: usernameRef.current },
       })
     },
     immediatelyRender: false,
@@ -169,16 +183,16 @@ export default function NoteEditor({ noteId, initialTitle, initialContent, group
     router.push('/dashboard')
   }
 
-  const statusColors = { saved: 'text-green-600', saving: 'text-yellow-500', unsaved: 'text-orange-500', error: 'text-red-500' }
+  const statusColors = { saved: 'text-cyber-cyan', saving: 'text-cyber-yellow', unsaved: 'text-cyber-orange', error: 'text-cyber-pink' }
   const statusText = { saved: '✓ Saved', saving: '⟳ Saving...', unsaved: '● Unsaved', error: '✕ Error' }
 
   return (
     <div className="flex h-full">
       {/* Headings outline */}
-      <aside className="w-52 flex-shrink-0 border-r border-gray-200 overflow-y-auto bg-gray-50 hidden lg:block">
+      <aside className="w-52 flex-shrink-0 border-r border-cyber-cyan/10 overflow-y-auto bg-cyber-dark/50 cyber-scrollbar hidden lg:block">
         <div className="p-3">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Headings</p>
-          {headings.length === 0 && <p className="text-xs text-gray-400 italic">No headings yet</p>}
+          <p className="text-xs font-semibold text-cyber-cyan/40 uppercase tracking-wider mb-2 font-display">Headings</p>
+          {headings.length === 0 && <p className="text-xs text-white/20 italic">No headings yet</p>}
           {headings.map((h, i) => (
             <button
               key={i}
@@ -187,9 +201,9 @@ export default function NoteEditor({ noteId, initialTitle, initialContent, group
                 els[i]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
               }}
               style={{ paddingLeft: `${(h.level - 1) * 10}px` }}
-              className="block w-full text-left text-xs py-1 px-1 rounded hover:bg-gray-200 text-gray-600 truncate mb-0.5"
+              className="block w-full text-left text-xs py-1 px-1 hover:bg-cyber-cyan/[0.04] text-white/40 hover:text-cyber-cyan truncate mb-0.5 transition-all border-l border-transparent hover:border-cyber-cyan/30"
             >
-              <span className="text-gray-400 mr-1">H{h.level}</span>{h.text || '(empty)'}
+              <span className="cyber-gradient-text mr-1 font-mono text-[10px]">H{h.level}</span>{h.text || '(empty)'}
             </button>
           ))}
         </div>
@@ -197,25 +211,35 @@ export default function NoteEditor({ noteId, initialTitle, initialContent, group
 
       {/* Editor area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200 bg-white">
+        <div className="flex items-center justify-between px-6 py-3 border-b border-cyber-cyan/10 bg-cyber-dark/30">
           <input
             type="text"
             value={title}
             onChange={(e) => handleTitleChange(e.target.value)}
             placeholder="Note title..."
-            className="flex-1 text-2xl font-bold text-gray-800 bg-transparent outline-none placeholder-gray-300"
+            className="flex-1 text-2xl font-bold text-white/80 bg-transparent outline-none placeholder-white/10 font-display"
           />
           <div className="flex items-center gap-3 ml-4">
-            {lastEditor && <span className="text-xs text-gray-400">edited by {lastEditor}</span>}
-            <span className={`text-xs font-medium ${statusColors[saveStatus]}`}>{statusText[saveStatus]}</span>
-            <button onClick={deleteNote} className="text-xs text-red-400 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50">Delete</button>
+            {lastEditor && (
+              <span className="text-xs text-cyber-cyan/50 flex items-center gap-1 font-mono">
+                <span className="w-1.5 h-1.5 bg-cyber-cyan animate-pulse" />
+                {lastEditor} editing
+              </span>
+            )}
+            <span className={`text-xs font-mono ${statusColors[saveStatus]}`}>{statusText[saveStatus]}</span>
+            <button onClick={deleteNote} className="text-xs text-cyber-pink/50 hover:text-cyber-pink px-2 py-1 hover:bg-cyber-pink/[0.04] transition-all rounded">Delete</button>
           </div>
         </div>
 
         <Toolbar editor={editor} onImageUpload={handleImageUpload} />
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto bg-cyber-black/50 cyber-grid">
           <EditorContent editor={editor} className="prose prose-gray max-w-none px-8 py-6 min-h-full focus:outline-none" />
+        </div>
+
+        {/* Status bar */}
+        <div className="flex items-center justify-between px-4 py-1.5 border-t border-cyber-cyan/10 bg-cyber-dark/20 text-[10px] font-mono text-white/20">
+          <span>{stats.words} words · {stats.chars} characters</span>
         </div>
       </div>
     </div>

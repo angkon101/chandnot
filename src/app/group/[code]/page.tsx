@@ -54,61 +54,61 @@ export default async function GroupPage({
       <Sidebar notes={myNotes ?? []} groups={groups} username={auth.username} />
 
       {/* Group panel */}
-      <aside className="w-60 flex-shrink-0 border-r border-gray-200 bg-gray-50 flex flex-col">
-        <div className="px-4 py-4 border-b border-gray-200">
-          <h2 className="font-bold text-gray-800 truncate">{group.name}</h2>
+      <aside className="w-60 flex-shrink-0 border-r border-cyber-cyan/10 bg-cyber-dark/40 flex flex-col">
+        <div className="px-4 py-4 border-b border-cyber-cyan/10">
+          <h2 className="font-bold text-white/80 truncate font-display">{group.name}</h2>
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-xs font-mono bg-violet-100 text-violet-700 px-2 py-0.5 rounded font-medium">
+            <span className="text-xs font-mono cyber-badge px-2 py-0.5 font-medium">
               {group.code}
             </span>
-            <span className="text-xs text-gray-400">
-              {group.members?.length ?? 0} member{(group.members?.length ?? 0) !== 1 ? 's' : ''}
+            <span className="text-xs text-white/30 font-mono">
+              [{group.members?.length ?? 0}]
             </span>
           </div>
         </div>
 
         {/* Members */}
-        <div className="px-4 py-3 border-b border-gray-200">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Members</p>
+        <div className="px-4 py-3 border-b border-cyber-cyan/10">
+          <p className="text-xs font-semibold text-white/20 uppercase tracking-wider mb-2 font-display">Members</p>
           {(group.members ?? []).map((m: any) => (
             <div key={m.userId} className="flex items-center gap-1.5 py-0.5">
-              <div className="w-5 h-5 rounded-full bg-violet-200 flex items-center justify-center text-xs text-violet-700 font-medium">
+              <div className="w-5 h-5 bg-cyber-dark border border-cyber-cyan/30 flex items-center justify-center text-[10px] font-mono text-cyber-cyan">
                 {m.user?.username?.[0]?.toUpperCase()}
               </div>
-              <span className="text-sm text-gray-600 truncate">{m.user?.username}</span>
-              {m.role === 'admin' && <span className="text-xs text-violet-500 ml-auto">admin</span>}
+              <span className="text-sm text-white/50 truncate font-mono text-xs">{m.user?.username}</span>
+              {m.role === 'admin' && <span className="text-[10px] text-cyber-pink ml-auto font-mono">admin</span>}
             </div>
           ))}
         </div>
 
         {/* Notes */}
-        <div className="flex-1 overflow-y-auto px-4 py-3">
+        <div className="flex-1 overflow-y-auto px-4 py-3 cyber-scrollbar">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Notes</p>
+            <p className="text-xs font-semibold text-white/20 uppercase tracking-wider font-display">Notes</p>
             <GroupNoteCreate groupCode={params.code} />
           </div>
           {(groupNotes ?? []).length === 0 && (
-            <p className="text-xs text-gray-400 italic">No notes yet. Create one!</p>
+            <p className="text-xs text-white/20 italic font-mono">No notes yet. Create one!</p>
           )}
           {(groupNotes ?? []).map((note: any) => (
             <Link
               key={note.id}
               href={`/group/${params.code}?note=${note.id}`}
-              className={`block px-2 py-1.5 rounded-lg text-sm truncate transition-colors mb-0.5 ${
+              className={`block px-2 py-1.5 text-sm truncate transition-all mb-0.5 ${
                 activeNote?.id === note.id
-                  ? 'bg-violet-100 text-violet-800 font-medium'
-                  : 'text-gray-600 hover:bg-gray-200'
+                  ? 'bg-cyber-cyan/10 text-cyber-cyan border-l-2 border-cyber-cyan'
+                  : 'text-white/40 hover:text-white/70 hover:bg-white/[0.02] border-l-2 border-transparent'
               }`}
             >
               <div className="truncate">{note.title || 'Untitled'}</div>
-              <div className="text-xs text-gray-400 truncate">by {note.user?.username}</div>
+              <div className="text-xs text-white/20 font-mono">by {note.user?.username}</div>
             </Link>
           ))}
         </div>
       </aside>
 
       {/* Editor or welcome */}
-      <main className="flex-1 overflow-hidden bg-white">
+      <main className="flex-1 overflow-hidden bg-cyber-black">
         {activeNote ? (
           <NoteEditor
             noteId={activeNote.id}
@@ -120,13 +120,13 @@ export default async function GroupPage({
         ) : (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <div className="text-5xl mb-3">👥</div>
-              <h3 className="text-xl font-bold text-gray-700 mb-1">{group.name}</h3>
-              <p className="text-gray-400 text-sm mb-4">Select a note or create a new one</p>
-              <p className="text-xs text-gray-400">
-                Share code{' '}
-                <span className="font-mono font-bold text-violet-600">{group.code}</span>{' '}
-                with others to collaborate
+              <div className="text-4xl mb-3">👥</div>
+              <h3 className="text-xl font-bold font-display cyber-gradient-text mb-1">{group.name}</h3>
+              <p className="text-white/30 text-sm mb-4 font-mono">Select a note or create a new one</p>
+              <p className="text-xs text-white/20 font-mono">
+                SHARE CODE{' '}
+                <span className="font-mono font-bold cyber-neon-text">{group.code}</span>{' '}
+                TO COLLABORATE
               </p>
             </div>
           </div>

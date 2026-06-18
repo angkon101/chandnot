@@ -32,18 +32,26 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen flex items-center justify-center bg-cyber-black cyber-grid relative overflow-hidden">
+      {/* Animated grid lines */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/3 -right-20 w-40 h-px bg-gradient-to-l from-transparent via-cyber-pink/20 to-transparent animate-scanline" style={{ animationDuration: '7s' }} />
+        <div className="absolute top-2/3 -left-20 w-40 h-px bg-gradient-to-r from-transparent via-cyber-purple/20 to-transparent animate-scanline" style={{ animationDuration: '9s' }} />
+      </div>
+
+      <div className="w-full max-w-sm relative">
         <div className="text-center mb-8">
-          <div className="text-5xl mb-3">📓</div>
-          <h1 className="text-3xl font-bold text-gray-900">Open Notebook</h1>
-          <p className="text-gray-500 mt-1">Create your account</p>
+          <div className="text-4xl mb-3 inline-block">📓</div>
+          <h1 className="text-3xl font-bold font-display cyber-gradient-text">Open Notebook</h1>
+          <p className="text-white/30 mt-1 font-mono text-sm">REGISTER // TERMINAL</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="cyber-card p-8 relative">
+          <div className="absolute top-2 right-3 text-[10px] font-mono text-cyber-pink/30">AUTH::REGISTER</div>
+
+          <form onSubmit={handleSubmit} className="space-y-4 mt-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+              <label className="block text-xs font-mono text-white/40 mb-1">USERNAME</label>
               <input
                 type="text"
                 value={username}
@@ -51,50 +59,50 @@ export default function RegisterPage() {
                 placeholder="your_username"
                 required
                 autoFocus
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent text-sm"
+                className="w-full px-4 py-2.5 cyber-input text-sm rounded"
               />
-              <p className="text-xs text-gray-400 mt-1">Letters, numbers, underscores only. Min 3 chars.</p>
+              <p className="text-xs font-mono text-white/20 mt-1">Letters, numbers, underscores. Min 3 chars.</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <label className="block text-xs font-mono text-white/40 mb-1">PASSWORD</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••"
+                placeholder="••••••••"
                 required
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent text-sm"
+                className="w-full px-4 py-2.5 cyber-input text-sm rounded"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+              <label className="block text-xs font-mono text-white/40 mb-1">CONFIRM PASSWORD</label>
               <input
                 type="password"
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
-                placeholder="••••••"
+                placeholder="••••••••"
                 required
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent text-sm"
+                className="w-full px-4 py-2.5 cyber-input text-sm rounded"
               />
             </div>
 
             {error && (
-              <p className="text-red-500 text-sm bg-red-50 px-3 py-2 rounded-lg">{error}</p>
+              <p className="text-cyber-pink text-sm bg-cyber-pink/[0.04] px-3 py-2 border border-cyber-pink/10 font-mono text-xs">{'>'} {error}</p>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 px-4 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full py-2.5 px-4 cyber-btn-primary rounded text-sm disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {loading ? 'Creating account...' : 'Create account'}
+              <span>{loading ? 'CREATING ACCOUNT...' : 'CREATE ACCOUNT'}</span>
             </button>
           </form>
 
-          <p className="text-center text-sm text-gray-500 mt-6">
-            Already have an account?{' '}
-            <Link href="/login" className="text-violet-600 hover:text-violet-700 font-medium">
-              Sign in
+          <p className="text-center text-sm text-white/30 mt-6 font-mono text-xs">
+            ALREADY HAVE AN ACCOUNT?{' '}
+            <Link href="/login" className="cyber-gradient-text hover:opacity-80 transition-opacity font-medium">
+              SIGN IN
             </Link>
           </p>
         </div>
