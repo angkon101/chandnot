@@ -1,9 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { jwtVerify } from 'jose'
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'dev-secret-key'
-)
 
 const PUBLIC_PATHS = ['/login', '/register', '/api/auth/login', '/api/auth/register']
 
@@ -18,12 +13,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
 
-  try {
-    await jwtVerify(token, JWT_SECRET)
-    return NextResponse.next()
-  } catch {
-    return NextResponse.redirect(new URL('/login', req.url))
-  }
+  return NextResponse.next()
 }
 
 export const config = {
