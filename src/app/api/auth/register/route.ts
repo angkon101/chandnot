@@ -23,7 +23,10 @@ export async function POST(req: NextRequest) {
     const { data: user, error } = await admin
       .from('User').insert({ username, password: hashed }).select('id, username').single()
 
-    if (error || !user) return NextResponse.json({ error: 'Failed to create user' }, { status: 500 })
+    if (error || !user) {
+      console.error('Insert error:', JSON.stringify(error))
+      return NextResponse.json({ error: error?.message ?? 'Failed to create user' }, { status: 500 })
+    }
 
     const token = createToken(user.id, user.username)
     const response = NextResponse.json({ user }, { status: 201 })
