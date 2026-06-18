@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class',
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -8,32 +9,28 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Space Grotesk', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        sans:    ['IBM Plex Mono', 'Courier New', 'monospace'],
+        display: ['Special Elite', 'IBM Plex Mono', 'monospace'],
+        mono:    ['IBM Plex Mono', 'Courier New', 'monospace'],
       },
       colors: {
         cyber: {
-          black: '#0a0a0f',
-          dark: '#12121a',
-          darker: '#08080c',
-          gray: '#1a1a24',
-          cyan: '#00fff9',
-          pink: '#ff00aa',
-          purple: '#bf40ff',
-          yellow: '#ffee00',
-          green: '#39ff14',
-          blue: '#4488ff',
-          orange: '#ff6600',
-          red: '#ff0044',
+          black:  'rgba(var(--bg-rgb), <alpha-value>)',
+          dark:   'rgba(var(--surface-rgb), <alpha-value>)',
+          darker: 'rgba(var(--darker-rgb), <alpha-value>)',
+          gray:   '#1a1a18',
+          pink:   'rgba(var(--primary-rgb), <alpha-value>)',
+          cyan:   'rgba(var(--accent-rgb), <alpha-value>)',
+          purple: 'rgba(var(--purple-rgb), <alpha-value>)',
+          fg:     'rgba(var(--fg-rgb), <alpha-value>)',
         },
       },
       boxShadow: {
-        'cyber-cyan': '0 0 12px rgba(0, 255, 249, 0.25), 0 0 40px rgba(0, 255, 249, 0.08)',
-        'cyber-pink': '0 0 12px rgba(255, 0, 170, 0.25), 0 0 40px rgba(255, 0, 170, 0.08)',
-        'cyber-sm': '0 1px 3px rgba(0, 0, 0, 0.3)',
-        'cyber-md': '0 4px 12px rgba(0, 0, 0, 0.4)',
-        'cyber-lg': '0 8px 30px rgba(0, 0, 0, 0.5)',
+        'cyber-pink': '3px 3px 0 rgba(0,0,0,0.08)',
+        'cyber-cyan': '3px 3px 0 rgba(0,0,0,0.06)',
+        'cyber-sm':   '1px 1px 0 rgba(0,0,0,0.06)',
+        'cyber-md':   '3px 3px 0 rgba(0,0,0,0.08)',
+        'cyber-lg':   '5px 5px 0 rgba(0,0,0,0.1)',
       },
       transitionTimingFunction: {
         'out-expo': 'cubic-bezier(0.16, 1, 0.3, 1)',

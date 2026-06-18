@@ -152,26 +152,26 @@ export default function NoteEditor({ noteId, initialTitle, initialContent, group
     router.push('/dashboard')
   }
 
-  const statusColors = { saved: 'text-cyan-400/70', saving: 'text-yellow-400/70', unsaved: 'text-orange-400/70', error: 'text-red-400/70' }
+  const statusColors = { saved: 'text-cyber-fg/40', saving: 'text-yellow-600/80', unsaved: 'text-orange-600/80', error: 'text-red-500/80' }
   const statusText = { saved: 'Saved', saving: 'Saving...', unsaved: 'Unsaved', error: 'Error' }
 
   return (
     <div className="flex h-full">
       {/* Headings outline */}
-      <aside className="w-52 flex-shrink-0 border-r border-white/5 overflow-y-auto bg-black/20 cyber-scrollbar hidden lg:block">
+      <aside className="w-52 flex-shrink-0 border-r border-cyber-fg/5 overflow-y-auto bg-cyber-fg/[0.02] cyber-scrollbar hidden lg:block">
         <div className="p-4">
-          <p className="text-[11px] font-semibold text-white/20 uppercase tracking-widest mb-3">Headings</p>
-          {headings.length === 0 && <p className="text-xs text-white/15 italic">No headings yet</p>}
+          <p className="text-[11px] font-semibold text-cyber-fg/20 uppercase tracking-widest mb-3">Headings</p>
+          {headings.length === 0 && <p className="text-xs text-cyber-fg/15 italic">No headings yet</p>}
           <div className="space-y-0.5">
             {headings.map((h, i) => (
               <button
                 key={i}
                 onClick={() => { document.querySelectorAll('h1,h2,h3,h4')[i]?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}
                 style={{ paddingLeft: `${(h.level - 1) * 12 + 4}px` }}
-                className="block w-full text-left text-xs py-1.5 px-2 rounded-md hover:bg-white/[0.03] text-white/35 hover:text-cyber-cyan/70 truncate transition-all"
+                className="block w-full text-left text-xs py-1.5 px-2 rounded-sm hover:bg-cyber-fg/[0.03] text-cyber-fg/35 hover:text-cyber-fg/75 truncate transition-all"
               >
-                <span className="text-[10px] font-mono text-cyber-cyan/30 mr-1.5">H{h.level}</span>
-                {h.text || <span className="italic text-white/15">(empty)</span>}
+                <span className="text-[10px] font-mono text-cyber-fg/25 mr-1.5">H{h.level}</span>
+                {h.text || <span className="italic text-cyber-fg/15">(empty)</span>}
               </button>
             ))}
           </div>
@@ -181,18 +181,18 @@ export default function NoteEditor({ noteId, initialTitle, initialContent, group
       {/* Editor area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Title bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 sm:px-6 py-3 border-b border-white/5 bg-black/20">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 sm:px-6 py-3 border-b border-cyber-fg/5 bg-cyber-fg/[0.02]">
           <input
             type="text"
             value={title}
             onChange={(e) => handleTitleChange(e.target.value)}
             placeholder="Note title..."
-            className="flex-1 text-lg sm:text-xl font-bold text-white/80 bg-transparent outline-none placeholder-white/10 font-display min-w-0 tracking-tight"
+            className="flex-1 text-lg sm:text-xl font-bold text-cyber-fg/80 bg-transparent outline-none placeholder-cyber-fg/20 font-display min-w-0 tracking-tight"
           />
           <div className="flex items-center gap-3 shrink-0">
             {lastEditor && (
-              <span className="flex items-center gap-1.5 text-[11px] text-cyan-400/50 font-mono">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/60 animate-pulse shrink-0" />
+              <span className="flex items-center gap-1.5 text-[11px] text-cyber-fg/45 font-mono">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyber-fg/55 animate-pulse shrink-0" />
                 <span className="hidden sm:inline">{lastEditor}</span>
               </span>
             )}
@@ -205,14 +205,13 @@ export default function NoteEditor({ noteId, initialTitle, initialContent, group
 
         <Toolbar editor={editor} onImageUpload={handleImageUpload} />
 
-        <div className="flex-1 overflow-y-auto bg-black/30 cyber-grid">
+        <div className="flex-1 overflow-y-auto bg-cyber-fg/[0.02] cyber-grid">
           <EditorContent editor={editor} className="max-w-none px-4 sm:px-8 md:px-12 py-6 sm:py-8 md:py-10 min-h-full focus:outline-none prose prose-sm max-w-none" />
         </div>
 
-        {/* Status bar */}
-        <div className="flex items-center gap-4 px-4 sm:px-6 py-2 border-t border-white/5 bg-black/20 text-[11px] font-mono text-white/20">
+        <div className="flex items-center gap-4 px-4 sm:px-6 py-2 border-t border-cyber-fg/5 bg-cyber-fg/[0.02] text-[11px] font-mono text-cyber-fg/20">
           <span>{stats.words} words</span>
-          <span className="w-px h-3 bg-white/5" />
+          <span className="w-px h-3 bg-cyber-fg/5" />
           <span>{stats.chars} characters</span>
         </div>
       </div>

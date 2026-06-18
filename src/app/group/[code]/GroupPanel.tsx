@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import GroupNoteCreate from '@/components/GroupNoteCreate'
 
 interface GroupPanelProps {
@@ -14,8 +13,6 @@ interface GroupPanelProps {
 
 export default function GroupPanel({ group, groupNotes, activeNoteId, groupCode }: GroupPanelProps) {
   const [panelOpen, setPanelOpen] = useState(false)
-  const pathname = usePathname()
-
   const panelContent = (
     <div className="flex flex-col h-full">
       <div className="px-4 py-4 border-b border-white/5">
@@ -44,7 +41,7 @@ export default function GroupPanel({ group, groupNotes, activeNoteId, groupCode 
             </div>
             <span className="text-xs text-white/40 truncate font-mono">{m.user?.username}</span>
             {m.role === 'admin' && (
-              <span className="text-[10px] font-mono text-cyber-pink/60 ml-auto shrink-0">admin</span>
+              <span className="text-[10px] font-mono text-white/35 ml-auto shrink-0 uppercase tracking-widest">admin</span>
             )}
           </div>
         ))}
@@ -65,7 +62,7 @@ export default function GroupPanel({ group, groupNotes, activeNoteId, groupCode 
             onClick={() => setPanelOpen(false)}
             className={`block rounded-lg px-3 py-2 text-sm transition-all mb-0.5 ${
               activeNoteId === note.id
-                ? 'bg-cyan-400/10 text-cyber-cyan border border-cyan-900/30'
+                ? 'bg-cyber-fg/8 text-cyber-fg border border-cyber-fg/20'
                 : 'text-white/35 hover:text-white/60 hover:bg-white/[0.02] border border-transparent'
             }`}
           >
