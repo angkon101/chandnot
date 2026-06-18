@@ -1,13 +1,14 @@
 'use client'
 
 import { Editor } from '@tiptap/react'
+import { ReactNode } from 'react'
 
 interface ToolbarProps { editor: Editor | null; onImageUpload: () => void }
 
 export default function Toolbar({ editor, onImageUpload }: ToolbarProps) {
   if (!editor) return null
 
-  const btn = (active: boolean, title: string, onClick: () => void, children: React.ReactNode) => (
+  const btn = (active: boolean, title: string, onClick: () => void, children: ReactNode) => (
     <button
       type="button"
       title={title}
