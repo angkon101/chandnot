@@ -73,9 +73,9 @@ export default async function GroupPage({
             <div className="text-center">
               <div className="text-4xl mb-4">👥</div>
               <h3 className="text-xl font-bold font-display cyber-gradient-text mb-1">{group.name}</h3>
-              <p className="text-white/25 text-sm mb-4 font-mono">Select a note or create a new one</p>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/[0.02] border border-white/5 rounded-lg">
-                <span className="text-[10px] font-mono text-white/20 tracking-widest">SHARE CODE</span>
+              <p className="text-cyber-fg/25 text-sm mb-4 font-mono">Select a note or create a new one</p>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-cyber-fg/[0.02] border border-cyber-fg/5 rounded-lg">
+                <span className="text-[10px] font-mono text-cyber-fg/20 tracking-widest">SHARE CODE</span>
                 <span className="font-mono text-xs font-bold cyber-neon-text tracking-widest">{group.code}</span>
               </div>
             </div>

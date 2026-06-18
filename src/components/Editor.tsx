@@ -29,6 +29,7 @@ export default function NoteEditor({ noteId, initialTitle, initialContent, group
   const [headings, setHeadings] = useState<Heading[]>([])
   const [lastEditor, setLastEditor] = useState('')
   const [stats, setStats] = useState({ words: 0, chars: 0 })
+  const [uploadError, setUploadError] = useState('')
   const saveTimer = useRef<NodeJS.Timeout | null>(null)
   const channelRef = useRef<RealtimeChannel | null>(null)
   const isRemoteUpdate = useRef(false)
@@ -136,11 +137,21 @@ export default function NoteEditor({ noteId, initialTitle, initialContent, group
     input.onchange = async () => {
       const file = input.files?.[0]
       if (!file || !editor) return
+      setUploadError('')
       const form = new FormData(); form.append('file', file)
-      const res = await fetch('/api/upload', { method: 'POST', body: form })
-      if (res.ok) {
-        const { url } = await res.json()
-        editor.chain().focus().setImage({ src: url }).run()
+      try {
+        const res = await fetch('/api/upload', { method: 'POST', body: form })
+        if (res.ok) {
+          const { url } = await res.json()
+          editor.chain().focus().setImage({ src: url }).run()
+        } else {
+          const d = await res.json()
+          setUploadError(d.error || 'Upload failed')
+          setTimeout(() => setUploadError(''), 5000)
+        }
+      } catch {
+        setUploadError('Upload failed — check your connection')
+        setTimeout(() => setUploadError(''), 5000)
       }
     }
     input.click()
@@ -205,7 +216,14 @@ export default function NoteEditor({ noteId, initialTitle, initialContent, group
 
         <Toolbar editor={editor} onImageUpload={handleImageUpload} />
 
-        <div className="flex-1 overflow-y-auto bg-cyber-fg/[0.02] cyber-grid">
+        {uploadError && (
+          <div className="mx-4 mt-3 px-3 py-2 text-xs font-mono text-red-600 bg-red-50 border border-red-200 rounded-sm flex items-center gap-2">
+            <span>⚠</span>
+            <span>{uploadError}</span>
+          </div>
+        )}
+
+        <div className="flex-1 overflow-y-auto">
           <EditorContent editor={editor} className="max-w-none px-4 sm:px-8 md:px-12 py-6 sm:py-8 md:py-10 min-h-full focus:outline-none prose prose-sm max-w-none" />
         </div>
 

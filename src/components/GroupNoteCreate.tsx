@@ -25,7 +25,7 @@ export default function GroupNoteCreate({ groupCode }: { groupCode: string }) {
     <button
       onClick={createNote}
       disabled={loading}
-      className="text-xs font-mono text-cyan-400/60 hover:text-cyan-400 transition-colors disabled:opacity-40"
+      className="text-xs font-mono text-cyber-cyan/60 hover:text-cyber-cyan transition-colors disabled:opacity-40"
     >
       {loading ? '...' : '+ New'}
     </button>
